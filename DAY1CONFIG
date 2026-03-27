@@ -32,6 +32,7 @@ config t
 	 description VOICEVLAN
 end
 
+!( LINE 35 to 71 PASTE TO COREBABA SWITCH )
 !@@@LeafSwitchONLY
 config t
    hostname COREbaba-~~
@@ -67,13 +68,11 @@ config t
      no shutdown
 	 ip add 10.~~.100.4 255.255.255.0
 	 description VOICEVLAN
-	!
 end
 
 WARNING: IF YOU SEE AMBER/ORANGE= NEEDS FIXING!!!
-
 Trunk Ports: switch to switch:
-TAAS/BABA:
+TAAS/BABA: (Paste on COREtaas & COREbaba)
 config t
 Int Range fa0/10-12
  ! shutdown
@@ -85,7 +84,7 @@ end
 
 CCNPSkillsNow: Etherchannel with LinkAggregationControlProtocol:
 WARNING: THREE CABLES IS BETTER THAN ONE!
-@taas/BABA:
+@taas/BABA: (Paste on COREtaas & COREbaba)
 config t
 Int Range fa0/10-12
  channel-group 1 mode active
@@ -124,7 +123,6 @@ ip dhcp pool VOICEVLAN
    END
 
 !!CREATING AND PLACING PORTS INSIDEAVLAN:
-!
 config t
 vlan 10
    name WIFIVLAN
@@ -177,7 +175,7 @@ client-identifier 001a.0709.c258
 end
 show ip dhcp binding
 
-!@@@CME ROUTE CONFIG
+!@@@CME ROUTE CONFIG (Call Manager Express)
 config t
    hostname CME-~~
    enable secret pass
@@ -199,9 +197,7 @@ config t
  end
  
 !CME REGISTER
-!@EDGE - Session Initiation Protocol
-!Change SCCP mode to SIP mode
-!Phone SIP Registry
+!Change SCCP mode to SIP mode & !Phone SIP Registry
 conf t
 voice service voip
  allow-connections h323 to sip
@@ -380,13 +376,14 @@ conf t
  end
  
 !OSPF ROUTING
-!@CME:
+!@CME: (Call Manager Express)
 config t
 router ospf 1
 router-id 10.~~.100.8
 network 10.~~.100.0  0.0.0.255  area 0
 end
 
+!OSPF on COREswitch
 !@CoreBABA:
 config t
 router ospf 1
@@ -397,12 +394,15 @@ int gi 0/1
  ip ospf 1 area 0
 end
 
-Set Switchports to L3  "PORT1 MUST BE PART OF LAN"  = VLAN1
+!Set Switchports to L3  "PORT1 MUST BE PART OF LAN"  = VLAN1
 config system virtual-switch
- edit lan
-  config port
-   delete port1
-   delete port2
+    edit lan
+        config port
+            delete port1
+            delete port2
+        end
+    next
+end
 
 config system interface
  edit wan1
@@ -432,9 +432,24 @@ config system interface
   edit 1
    set area 0.0.0.0
    set prefix 10.~~.~~.0 255.255.255.0
-   end
+   next
   edit 2
    set area 0.0.0.0
    set prefix 200.0.0.0 255.255.255.0
    end
    end
+
+!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet)
+config firewall policy
+    edit 1
+        set name "VoIP-Allow"
+        set srcintf "lan"
+        set dstintf "wan"
+        set srcaddr "all"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "SIP" "RTP" "SCCP"
+        set nat enable
+    next
+end
