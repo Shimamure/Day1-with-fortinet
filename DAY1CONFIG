@@ -90,7 +90,8 @@ Int Range fa0/10-12
  channel-group 1 mode active
  channel-protocol Lacp
  do sh etherchannel summary
- do sh int po1 | inc BW
+ end
+sh int po1 | inc BW
 
 !DHCP: DYNAMIC HOST CONFIGURATION PROTOCOL
 !@@@LEAF SWITCH
@@ -260,7 +261,6 @@ voice register dn 10
  allow watch
 !
 voice register pool 1
- type 8851
  id mac obob.cafe.baba
  number 1 dn 1
  number 2 dn 2
@@ -273,7 +273,6 @@ voice register pool 1
  type 8851
 !
 voice register pool 2
- type 8851
  id mac haha.face.bobo
  number 1 dn 6
  number 2 dn 8
@@ -286,13 +285,17 @@ voice register pool 2
  type 8851
 end
 
-!Register Phones Create
+!Check/Debug SIP Phone Configurations
+!It must show the sip mac addresses for the phones to have numbers
+show voice register tftp-bind
+
+!Register Phones Re-Create profile
 conf t
 voice register global
 create profile sync syncinfo
 end
 
-!@incoming and outgoing
+!@incoming and outgoing call
 conf t
  voice service voip
  ip address trusted list
@@ -393,7 +396,7 @@ int gi 0/1
  ip ospf network point-to-point
 end
 
-!Set Switchports to L3  "PORT1 MUST BE PART OF LAN"  = VLAN1
+!Set Switchports to L3  "PORT1 MUST BE PART OF LAN"  = VLAN1 for FORTINET 80E
 config system virtual-switch
  edit lan
   config port
@@ -513,13 +516,14 @@ config ospf-interface
  end
 end
 
-! SHOW COMMANDS ON FORTINET & ROUTING TABLE & NEIGHBORS on Fortinet
+! SHOW COMMANDS ON FORTINET, SHOW ROUTING TABLE & SHOW NEIGHBORS
 GSIP: get system interface physical
 SRO: show router ospf
 GRION: get router info ospf neighbor
+GRIRTA: get router info routing-table all
 GRIRTO: get router info routing-table ospf
 
-!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet) for 60E
+!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet for 60E OUTGOING) Para makalabas
 config firewall policy
  edit 1
  set name "VoIP-Allow"
@@ -534,12 +538,43 @@ config firewall policy
  next
 end
 
-!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet) for 80E
+!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet for 80E OUTGOING) Para makalabas
 config firewall policy
  edit 1
  set name "VoIP-Allow"
  set srcintf "PORT1"
  set dstintf "WAN1"
+ set srcaddr "all"
+ set dstaddr "all"
+ set action accept
+ set schedule "always"
+ set service "ALL"
+ set nat disable
+ next
+end
+
+
+!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet for 60E INCOMING) Para makapasok
+config firewall policy
+ edit 1
+ set name "VoIP-Allow"
+ set srcintf "WAN1"
+ set dstintf "INTERNAL"
+ set srcaddr "all"
+ set dstaddr "all"
+ set action accept
+ set schedule "always"
+ set service "ALL"
+ set nat disable
+ next
+end
+
+!Edit Firewall Policy to call other classmates on FIREWALL (Fortinet for 80E INCOMING) Para makapasok
+config firewall policy
+ edit 1
+ set name "VoIP-Allow"
+ set srcintf "WAN1"
+ set dstintf "INTERNAL1"
  set srcaddr "all"
  set dstaddr "all"
  set action accept
