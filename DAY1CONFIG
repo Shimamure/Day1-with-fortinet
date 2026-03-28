@@ -426,13 +426,13 @@ config system interface
 !Some Fortinet use Internal/Port modes depending on the version of Fortinet you are using
 !Delete 1st the virtual-swtich to  L3  "INTERNA1 MUST BE PART OF LAN"  = VLAN1
 config system virtual-switch
-	edit "internal"
-		config port
-			delete "internal1"
- 			delete "internal2"
- 		end
- 	next
-end
+ edit "internal"
+ config port
+ delete "internal1"
+ delete "internal2"
+ end
+ next
+ end
 
 !Set static mode to internal1
 config system interface
@@ -472,15 +472,15 @@ GRIRTO: get router info routing-table ospf
 
 !Edit Firewall Policy to call other classmates on FIREWALL (Fortinet)
 config firewall policy
-    edit 1
-        set name "VoIP-Allow"
-        set srcintf "lan"
-        set dstintf "wan"
-        set srcaddr "all"
-        set dstaddr "all"
-        set action accept
-        set schedule "always"
-        set service "SIP" "RTP" "SCCP"
-        set nat enable
-    next
+ edit 1
+ set name "VoIP-Allow"
+ set srcintf "lan"
+ set dstintf "wan"
+ set srcaddr "all"
+ set dstaddr "all"
+ set action accept
+ set schedule "always"
+ set service "SIP" "RTP" "SCCP"
+ set nat enable
+ next
 end
