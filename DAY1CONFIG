@@ -333,8 +333,8 @@ conf t
   destination-pattern 41..
   session target ipv4:10.41.100.8
   codec g711ULAW
- dial-peer voice ~~ Voip
-  destination-pattern ~~..
+ dial-peer voice 42 Voip
+  destination-pattern 42..
   session target ipv4:10.~~.100.8
   codec g711ULAW
  dial-peer voice 51 Voip
